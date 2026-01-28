@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  whatsapp-api:
+    image: aldinokemal2104/go-whatsapp-web-multidevice:latest
+    container_name: bryanz-whatsapp-api
+    ports:
+      - "3000:3000"
+    environment:
+      - WEBHOOK_URL=http://host.docker.internal:8000/api/whatsapp/webhook
+      - WEBHOOK_SECRET=your-webhook-secret-here
+    command:
+      - rest
+      - --port=3000
+      - --debug=true
+    volumes:
+      - whatsapp_data:/app/storages
+    restart: unless-stopped
+    networks:
+      - bryanz-network
+
+networks:
+  bryanz-network:
+    driver: bridge
+
+volumes:
+  whatsapp_data:
+    driver: local
