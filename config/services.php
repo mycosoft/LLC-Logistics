@@ -49,7 +49,7 @@ return [
         
         // Local go-whatsapp-web-multidevice API configuration
         'local' => [
-            'api_url' => env('WHATSAPP_LOCAL_API_URL', 'http://localhost:3000'),
+            'api_url' => env('WHATSAPP_LOCAL_API_URL', 'http://147.93.85.45:3000'),
             'webhook_secret' => env('WHATSAPP_LOCAL_WEBHOOK_SECRET'),
         ],
     ],
