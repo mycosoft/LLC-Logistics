@@ -33,7 +33,7 @@ class RoleController extends Controller
             $role->givePermissionTo($validated['permissions']);
         }
 
-        return redirect()->route('roles.index')
+        return redirect()->route('admin.roles.index')
             ->with('success', 'Role created successfully.');
     }
 
@@ -59,20 +59,20 @@ class RoleController extends Controller
         $role->update(['name' => $validated['name']]);
         $role->syncPermissions($validated['permissions'] ?? []);
 
-        return redirect()->route('roles.index')
+        return redirect()->route('admin.roles.index')
             ->with('success', 'Role updated successfully.');
     }
 
     public function destroy(Role $role)
     {
         if (in_array($role->name, ['admin', 'staff'])) {
-            return redirect()->route('roles.index')
+            return redirect()->route('admin.roles.index')
                 ->with('error', 'Cannot delete default roles.');
         }
 
         $role->delete();
 
-        return redirect()->route('roles.index')
+        return redirect()->route('admin.roles.index')
             ->with('success', 'Role deleted successfully.');
     }
 }

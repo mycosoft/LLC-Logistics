@@ -23,10 +23,12 @@ class UpdateShipmentRequest extends FormRequest
     {
         return [
             // Basic Information
+            'tracking_number' => ['required', 'string', 'max:255', 'unique:shipments,tracking_number,' . $this->shipment->id],
             'client_id' => ['required', 'exists:clients,id'],
             'origin' => ['required', 'string', 'max:255'],
             'destination' => ['required', 'string', 'max:255'],
             'weight' => ['nullable', 'numeric', 'min:0'],
+            'charge_type' => ['nullable', 'in:per_kg,per_package,flat_rate,per_cbm'],
             'shipment_type' => ['required', 'in:air,sea,road'],
             'current_status' => ['nullable', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

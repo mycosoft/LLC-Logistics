@@ -18,90 +18,47 @@
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center gap-3">
                         <a href="{{ route('tracking.index') }}" class="flex items-center gap-3">
-                            <img class="h-10 w-auto object-contain" src="{{ asset('images/logo.png') }}" alt="Bryanz Logistics">
-                            <span class="text-2xl font-bold text-gray-900 tracking-tight">Bryanz Logistics</span>
+                            <img class="h-10 w-auto object-contain" src="{{ asset('images/logo.png') }}" alt="LLC Express Logistics">
+                            <span class="text-2xl font-bold text-gray-900 tracking-tight">LLC Express Logistics</span>
                         </a>
-                    </div>
-                </div>
-                <div class="flex items-center">
-                    <a href="{{ route('tracking.index') }}" class="text-gray-600 hover:text-blue-600 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 hover:bg-blue-50 flex items-center gap-2">
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        Track Another
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-12">
-        <div class="bg-white shadow-lg rounded-2xl overflow-hidden mb-8 border border-gray-100">
-            <div class="px-6 py-8 sm:px-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-gray-100">
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Shipment Details</h3>
-                    <p class="mt-1 text-3xl font-bold text-gray-900 tracking-tight">{{ $shipment->tracking_number }}</p>
-                </div>
-                <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-blue-50 text-blue-700 border border-blue-100">
-                    <span class="w-2 h-2 bg-blue-600 rounded-full mr-2 animate-pulse"></span>
-                    {{ $shipment->current_status }}
-                </span>
-            </div>
-            <div class="px-6 py-6 sm:px-8">
-                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Origin</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900">{{ $shipment->origin }}</dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Destination</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900">{{ $shipment->destination }}</dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Expected Delivery</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900">
-                            @if($shipment->delivery_time_min && $shipment->delivery_time_max)
-                                {{ $shipment->delivery_time_min }}-{{ $shipment->delivery_time_max }} 
-                                {{ $shipment->delivery_time_unit === 'months' ? 'months' : 'days' }}
-                            @else
-                                Not specified
-                            @endif
-                        </dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Description</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900 truncate">{{ $shipment->description ?? 'No description available' }}</dd>
-                    </div>
-                </dl>
-            </div>
-            <div class="px-6 py-6 sm:px-8 border-t border-gray-100">
-                <h4 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-4">Package Details</h4>
-                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Weight</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900">{{ $shipment->weight ? $shipment->weight . ' kg' : 'N/A' }}</dd>
-                    </div>
-
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Packages</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900">{{ $shipment->num_packages ?? 1 }}</dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Service</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900 capitalize">{{ str_replace('_', ' ', $shipment->service_type ?? 'Standard') }}</dd>
-                    </div>
-                    <div class="sm:col-span-1">
-                        <dt class="text-sm font-medium text-gray-500">Type</dt>
-                        <dd class="mt-1 text-lg font-semibold text-gray-900 capitalize">{{ str_replace('_', ' ', $shipment->package_type ?? 'Box') }}</dd>
-                    </div>
-                </dl>
             </div>
         </div>
 
+        @if(strtolower($shipment->current_status) === 'ready for pickup')
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-lg shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-amber-800">Package Ready for Pickup</p>
+                    <p class="text-sm text-amber-700 mt-1">
+                        Your package is ready for collection. <strong>Please collect it within 14 days.</strong> Uncollected packages after 2 weeks will be subject to auctioning.
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
 
-
-
+        @if(strtolower($shipment->current_status) === 'auction warning')
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8 rounded-lg shadow-sm">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-red-800">Auction Warning</p>
+                    <p class="text-sm text-red-700 mt-1">
+                        This package has been uncollected for over 14 days. If not picked up immediately, it will be moved to auction. Please contact us urgently.
+                    </p>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <!-- Timeline -->
         <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100">
@@ -127,6 +84,12 @@
                                                 if (str_contains($status, 'delivered')) {
                                                     $iconColor = 'bg-green-500';
                                                     $icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />';
+                                                } elseif (str_contains($status, 'ready for pickup')) {
+                                                    $iconColor = 'bg-teal-500';
+                                                    $icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />';
+                                                } elseif (str_contains($status, 'auction')) {
+                                                    $iconColor = 'bg-red-600';
+                                                    $icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
                                                 } elseif (str_contains($status, 'transit') || str_contains($status, 'shipped')) {
                                                     $iconColor = 'bg-blue-600';
                                                     $icon = '<path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />';
@@ -201,7 +164,7 @@
     <footer class="bg-white border-t border-gray-200 mt-auto">
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-sm text-gray-500">
-                &copy; {{ date('Y') }} Bryanz Logistics. All rights reserved.
+                &copy; {{ date('Y') }} LLC Express Logistics. All rights reserved.
             </p>
         </div>
     </footer>

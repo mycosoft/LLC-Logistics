@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -32,11 +33,12 @@ class InvoiceController extends Controller
         // Search by invoice number or tracking number
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('invoice_number', 'like', "%{$search}%")
-                  ->orWhereHas('shipment', function($sq) use ($search) {
-                      $sq->where('tracking_number', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('shipment', function ($sq) use ($search) {
+                    $sq->where('tracking_number', 'like', "%{$search}%");
+                }
+                );
             });
         }
 
@@ -46,17 +48,17 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Display the specified invoice.
+     * Display specified invoice.
      */
     public function show(Invoice $invoice)
     {
         $invoice->load(['shipment.client', 'shipment.receiver', 'payments.recorder', 'items']);
-        
+
         $companySettings = [
-            'name' => 'Bryan Logistics',
-            'address' => 'Ttowa Mall building, Room C102, Opposite CPS Kampala',
-            'phone' => '0755 729 943 / 0743 507 702',
-            'email' => 'bryanlogistics256@gmail.com',
+            'name' => 'LLC Express Logistics',
+            'address' => 'Kawempe - Tula',
+            'phone' => '+256 703 948463',
+            'email' => 'info@llclogistics.com',
             'logo' => 'images/logo.png',
         ];
 
@@ -64,17 +66,17 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Generate PDF for the specified invoice.
+     * Generate PDF for specified invoice.
      */
     public function generatePDF(Invoice $invoice)
     {
         $invoice->load(['shipment.client', 'shipment.receiver', 'items']);
-        
+
         $companySettings = [
-            'name' => 'Bryan Logistics',
-            'address' => 'Ttowa Mall building, Room C102, Opposite CPS Kampala',
-            'phone' => '0755 729 943 / 0743 507 702',
-            'email' => 'bryanlogistics256@gmail.com',
+            'name' => 'LLC Express Logistics',
+            'address' => 'Kawempe - Tula',
+            'phone' => '+256 703 948463',
+            'email' => 'info@llclogistics.com',
             'logo' => 'images/logo.png',
         ];
 
@@ -93,9 +95,9 @@ class InvoiceController extends Controller
     public function sendInvoice(Request $request, Invoice $invoice)
     {
         $invoice->load(['shipment.client']);
-        
+
         $client = $invoice->shipment->client;
-        
+
         if (!$client) {
             return redirect()->back()->with('error', 'Client not found for this invoice.');
         }
@@ -111,7 +113,8 @@ class InvoiceController extends Controller
             try {
                 $client->notify(new \App\Notifications\InvoiceSent($invoice));
                 $sentVia[] = 'email';
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 \Log::error('Failed to send invoice email: ' . $e->getMessage());
             }
         }
@@ -121,7 +124,8 @@ class InvoiceController extends Controller
             try {
                 $client->notify(new \App\Notifications\InvoiceSent($invoice));
                 $sentVia[] = 'whatsapp';
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 \Log::error('Failed to send invoice WhatsApp: ' . $e->getMessage());
             }
         }

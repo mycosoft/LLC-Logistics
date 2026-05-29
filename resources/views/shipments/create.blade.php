@@ -296,10 +296,10 @@
                                 <div class="form-group">
                                     <label for="currency">Currency</label>
                                     <select name="currency" id="currency" class="form-control @error('currency') is-invalid @enderror">
-                                        <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD ($)</option>
-                                        <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR (€)</option>
-                                        <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>GBP (£)</option>
-                                        <option value="UGX" {{ old('currency') == 'UGX' ? 'selected' : '' }}>UGX (Shs)</option>
+                                        <option value="USD" {{ old('currency', 'USD') == 'USD' ? 'selected' : '' }}>$ USD (US Dollar)</option>
+                                        <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>€ EUR (Euro)</option>
+                                        <option value="GBP" {{ old('currency') == 'GBP' ? 'selected' : '' }}>£ GBP (British Pound)</option>
+                                        <option value="UGX" {{ old('currency') == 'UGX' ? 'selected' : '' }}>UGX (Ugandan Shilling)</option>
                                     </select>
                                     @error('currency')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -661,10 +661,10 @@ updateRemoveButtons();
 
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-        <b>Support Call</b> 0750501151
+        <b>Support Call</b> +256 703 948463
     </div>
 @stop
 

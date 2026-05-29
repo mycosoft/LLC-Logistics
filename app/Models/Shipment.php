@@ -17,7 +17,10 @@ class Shipment extends Model
         'destination',
         'weight',
         'shipment_type',
+        'charge_type',
         'current_status',
+        'ready_for_pickup_at',
+        'auction_notified_at',
         'description',
         'expected_delivery_date',
         // Delivery Range
@@ -65,6 +68,8 @@ class Shipment extends Model
 
     protected $casts = [
         'expected_delivery_date' => 'date',
+        'ready_for_pickup_at' => 'datetime',
+        'auction_notified_at' => 'datetime',
         'fragile' => 'boolean',
         'is_international' => 'boolean',
         'shipping_cost' => 'decimal:2',
@@ -79,10 +84,6 @@ class Shipment extends Model
         'cbm' => 'decimal:3',
     ];
 
-
-    /**
-     * Boot the model and generate tracking number
-     */
     protected static function boot()
     {
         parent::boot();
@@ -92,34 +93,6 @@ class Shipment extends Model
                 $shipment->tracking_number = self::generateTrackingNumber();
             }
         });
-    }
-
-    /**
-     * Generate a unique tracking number
-     * Format: BRY-YYYYMMDD-UNIQUENUMBER (e.g., BRY-20251129-000001)
-     */
-    public static function generateTrackingNumber()
-    {
-        $date = date('Ymd');
-        $prefix = 'BRY-' . $date . '-';
-        
-        // Get the last shipment created today
-        $lastShipment = self::where('tracking_number', 'like', $prefix . '%')
-            ->orderBy('id', 'desc')
-            ->first();
-
-        if ($lastShipment) {
-            // Extract the unique ID from the last tracking number
-            $lastNumber = (int) substr($lastShipment->tracking_number, -6);
-            $newNumber = $lastNumber + 1;
-        } else {
-            $newNumber = 1;
-        }
-
-        // Pad with zeros to make it 6 digits
-        $uniqueId = str_pad($newNumber, 6, '0', STR_PAD_LEFT);
-
-        return $prefix . $uniqueId;
     }
 
     /**
@@ -147,7 +120,7 @@ class Shipment extends Model
     }
 
     /**
-     * Get the invoices for the shipment
+     * Get invoices for the shipment
      */
     public function invoices()
     {
@@ -155,7 +128,7 @@ class Shipment extends Model
     }
 
     /**
-     * Get the status updates for the shipment
+     * Get status updates for the shipment
      */
     public function statusUpdates()
     {
@@ -168,6 +141,17 @@ class Shipment extends Model
     public function batch()
     {
         return $this->belongsTo(ShipmentBatch::class, 'batch_id');
+    }
+
+    /**
+     * Generate a unique tracking number
+     */
+    public static function generateTrackingNumber()
+    {
+        do {
+            $number = 'LLC-' . date('Ymd') . '-' . str_pad(mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+        } while (self::where('tracking_number', $number)->exists());
+        return $number;
     }
 
     /**

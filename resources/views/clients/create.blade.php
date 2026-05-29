@@ -23,8 +23,8 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label for="email">Email <span class="text-danger">*</span></label>
-                            <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required>
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}">
                             @error('email')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -77,10 +77,25 @@
 
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
         <b>Support Call</b> 0750501151
     </div>
+@stop
+
+@section('js')
+<script>
+    document.getElementById('phone').addEventListener('blur', function() {
+        let val = this.value.replace(/[^0-9+]/g, '');
+        val = val.replace(/^\+/, '');
+        if (val.startsWith('0')) {
+            val = '256' + val.substring(1);
+        } else if (!val.startsWith('256') && val.length > 0) {
+            val = '256' + val;
+        }
+        this.value = val;
+    });
+</script>
 @stop
 

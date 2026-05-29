@@ -28,7 +28,11 @@ class NotifyClientListener
         Log::info("Processing notification for Tracking #{$event->shipment->tracking_number}");
         
         if ($event->shipment->client) {
-            $event->shipment->client->notify(new \App\Notifications\ShipmentStatusChanged($event->shipment, $event->statusUpdate));
+            try {
+                $event->shipment->client->notify(new \App\Notifications\ShipmentStatusChanged($event->shipment, $event->statusUpdate));
+            } catch (\Exception $e) {
+                Log::error("Failed to send notification for Tracking #{$event->shipment->tracking_number}: " . $e->getMessage());
+            }
         }
     }
 }

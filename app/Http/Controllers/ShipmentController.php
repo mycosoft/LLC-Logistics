@@ -97,13 +97,12 @@ class ShipmentController extends Controller
             ->with('success', 'Shipment created successfully. Tracking Number: ' . $shipment->tracking_number);
     }
 
-
     /**
      * Display the specified resource.
      */
     public function show(Shipment $shipment)
     {
-        $shipment->load(['client', 'statusUpdates', 'invoices.items']);
+        $shipment->load(['client', 'statusUpdates', 'invoices.items', 'invoices.payments']);
         return view('shipments.show', compact('shipment'));
     }
 
@@ -122,7 +121,19 @@ class ShipmentController extends Controller
      */
     public function update(UpdateShipmentRequest $request, Shipment $shipment)
     {
-        $shipment->update($request->validated());
+        $validated = $request->validated();
+
+        if (isset($validated['current_status']) && strtolower(trim($validated['current_status'])) === 'picked up') {
+            $shipment->load('invoices');
+            $invoice = $shipment->invoices->first();
+
+            if ($invoice && $invoice->balance > 0) {
+                return redirect()->back()->withInput()
+                    ->with('error', 'Cannot change status to "Picked Up". The invoice has an outstanding balance. Please ensure that invoice is fully paid first.');
+            }
+        }
+
+        $shipment->update($validated);
 
         return redirect()->route('shipments.show', $shipment)
             ->with('success', 'Shipment updated successfully.');
@@ -138,6 +149,7 @@ class ShipmentController extends Controller
         return redirect()->route('shipments.index')
             ->with('success', 'Shipment deleted successfully.');
     }
+
     public function label(Shipment $shipment)
     {
         return view('shipments.label', compact('shipment'));
@@ -147,10 +159,10 @@ class ShipmentController extends Controller
     {
         // Load relationships
         $shipment->load(['client', 'receiver', 'invoices.items']);
-        
+
         // Get or create invoice for this shipment
         $invoice = $shipment->invoices()->first();
-        
+
         if (!$invoice) {
             // Create new invoice from shipment data
             $invoice = \App\Models\Invoice::create([
@@ -165,11 +177,11 @@ class ShipmentController extends Controller
                 'status' => $shipment->payment_status === 'paid' ? 'paid' : 'sent',
                 'created_by' => auth()->id(),
             ]);
-            
+
             // Create line items
             $order = 0;
             $subtotal = 0;
-            
+
             // Add shipping cost as line item
             if ($shipment->shipping_cost > 0) {
                 $amount = $shipment->shipping_cost;
@@ -182,7 +194,7 @@ class ShipmentController extends Controller
                 ]);
                 $subtotal += $amount;
             }
-            
+
             // Add insurance as line item
             if ($shipment->insurance_value > 0) {
                 $amount = $shipment->insurance_value;
@@ -195,24 +207,23 @@ class ShipmentController extends Controller
                 ]);
                 $subtotal += $amount;
             }
-            
+
             // Update invoice totals
             $invoice->update([
                 'subtotal' => $subtotal,
                 'total' => $subtotal + $invoice->tax - $invoice->discount,
             ]);
         }
-        
+
         // Get company settings
         $companySettings = [
-            'name' => 'Bryan Logistics',
-            'address' => 'Ttowa Mall building, Room C102, Opposite CPS Kampala',
-            'phone' => '0755 729 943 / 0743 507 702',
-            'email' => 'bryanlogistics256@gmail.com',
+            'name' => 'LLC Express Logistics',
+            'address' => 'Kawempe - Tula',
+            'phone' => '+256 703 948463',
+            'email' => 'info@llclogistics.com',
             'logo' => 'images/logo.png',
         ];
-        
+
         return view('shipments.invoice', compact('shipment', 'invoice', 'companySettings'));
     }
 }
-

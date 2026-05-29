@@ -28,6 +28,7 @@ class SettingController extends Controller
             'site_email' => 'nullable|email',
             'site_phone' => 'nullable|string|max:20',
             'site_address' => 'nullable|string|max:255',
+            'system_currency' => 'nullable|string|max:10',
             'site_logo' => 'nullable|image|max:2048',
             'smtp_host' => 'nullable|string',
             'smtp_port' => 'nullable|integer',

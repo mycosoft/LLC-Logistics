@@ -38,12 +38,12 @@ class ShipmentBatchController extends Controller
     }
 
     /**
-     * Show the form for creating a new batch
+     * Show form for creating a new batch
      */
     public function create()
     {
         $clients = Client::orderBy('name')->get();
-        
+
         return view('batches.create', compact('clients'));
     }
 
@@ -52,7 +52,7 @@ class ShipmentBatchController extends Controller
      */
     public function store(StoreBatchRequest $request)
     {
-        // Create the batch
+        // Create batch
         $batch = ShipmentBatch::create([
             'name' => $request->name,
             'description' => $request->description,
@@ -64,24 +64,24 @@ class ShipmentBatchController extends Controller
         // Create shipments for this batch
         if ($request->has('shipments') && is_array($request->shipments)) {
             foreach ($request->shipments as $shipmentData) {
-                // Add batch_id and current_status to shipment data
+                // Add batch_id, tracking number, and current_status to shipment data
                 $shipmentData['batch_id'] = $batch->id;
+                $shipmentData['tracking_number'] = \App\Models\Shipment::generateTrackingNumber();
                 $shipmentData['current_status'] = $batch->current_status;
-                
+
                 // Convert fragile checkbox to boolean
                 $shipmentData['fragile'] = isset($shipmentData['fragile']) ? 1 : 0;
-                
+
                 // Calculate total_amount if pricing fields are present
                 if (isset($shipmentData['shipping_cost'])) {
                     $shipping_cost = floatval($shipmentData['shipping_cost'] ?? 0);
                     $tax = floatval($shipmentData['tax'] ?? 0);
-                    $discount = floatval($shipmentData['discount'] ?? 0);
-                    $shipmentData['total_amount'] = $shipping_cost + $tax - $discount;
+                    $shipmentData['total_amount'] = $shipping_cost + $tax;
                 }
-                
-                // Create the shipment
+
+                // Create shipment
                 $shipment = Shipment::create($shipmentData);
-                
+
                 // Create invoice for this shipment if pricing data exists
                 if (isset($shipmentData['total_amount']) && $shipmentData['total_amount'] > 0) {
                     // Map payment_status to valid invoice status enum
@@ -91,16 +91,18 @@ class ShipmentBatchController extends Controller
                             $invoiceStatus = 'paid';
                         }
                     }
-                    
+
                     $invoice = \App\Models\Invoice::create([
                         'shipment_id' => $shipment->id,
+                        'invoice_number' => \App\Models\Invoice::generateInvoiceNumber(),
                         'total' => $shipmentData['total_amount'],
                         'tax' => $shipmentData['tax'] ?? 0,
-                        'discount' => $shipmentData['discount'] ?? 0,
+                        'discount' => 0,
                         'subtotal' => $shipmentData['shipping_cost'] ?? 0,
                         'status' => $invoiceStatus,
                         'issue_date' => now(),
                         'due_date' => now()->addDays(30),
+                        'created_by' => auth()->id(),
                     ]);
 
                     // Create invoice items if they exist
@@ -130,16 +132,16 @@ class ShipmentBatchController extends Controller
      */
     public function show(ShipmentBatch $batch)
     {
-        $batch->load(['shipments.client', 'shipments.invoice', 'creator']);
-        
+        $batch->load(['shipments.client', 'shipments.invoices.items', 'creator']);
+
         // Get available shipments (not in any batch) to add to this batch
         $availableShipments = Shipment::whereNull('batch_id')->with('client')->latest()->get();
-        
+
         return view('batches.show', compact('batch', 'availableShipments'));
     }
 
     /**
-     * Show the form for editing the batch
+     * Show the form for editing the specified batch
      */
     public function edit(ShipmentBatch $batch)
     {
@@ -167,6 +169,29 @@ class ShipmentBatchController extends Controller
      */
     public function updateStatus(UpdateBatchStatusRequest $request, ShipmentBatch $batch)
     {
+        if (strtolower(trim($request->current_status)) === 'picked up') {
+            // Load invoices with items and payments for all shipments
+            $batch->load(['shipments.invoices.items', 'shipments.invoices.payments']);
+
+            $shipmentsWithBalance = [];
+
+            foreach ($batch->shipments as $shipment) {
+                $invoice = $shipment->invoices->first() ?? $shipment->invoice;
+
+                if ($invoice) {
+                    // Check balance
+                    if ($invoice->balance > 0) {
+                        $shipmentsWithBalance[] = $shipment->tracking_number;
+                    }
+                }
+            }
+
+            if (!empty($shipmentsWithBalance)) {
+                return redirect()->route('admin.batches.show', $batch)
+                    ->with('error', 'Cannot change batch status to "Picked Up". The following shipments have outstanding invoice balances: ' . implode(', ', $shipmentsWithBalance) . '. Please ensure all invoices are fully paid first.');
+            }
+        }
+
         $batch->updateBatchStatus($request->current_status, $request->location, $request->notes);
 
         return redirect()->route('admin.batches.show', $batch)
@@ -180,7 +205,7 @@ class ShipmentBatchController extends Controller
     {
         // Remove batch association from shipments
         $batch->shipments()->update(['batch_id' => null]);
-        
+
         $batch->delete();
 
         return redirect()->route('admin.batches.index')
@@ -188,7 +213,7 @@ class ShipmentBatchController extends Controller
     }
 
     /**
-     * Add shipment to batch
+     * Add a shipment to batch
      */
     public function addShipment(Request $request, ShipmentBatch $batch)
     {
@@ -204,14 +229,14 @@ class ShipmentBatchController extends Controller
     }
 
     /**
-     * Remove shipment from batch
+     * Remove a shipment from batch
      */
     public function removeShipment(ShipmentBatch $batch, Shipment $shipment)
     {
         $shipment->update(['batch_id' => null]);
 
         return redirect()->route('admin.batches.show', $batch)
-            -with('success', 'Shipment removed from batch successfully.');
+            ->with('success', 'Shipment removed from batch successfully.');
     }
 
     /**
@@ -220,23 +245,21 @@ class ShipmentBatchController extends Controller
     public function generatePackingList(ShipmentBatch $batch)
     {
         $batch->load(['shipments.client']);
-        
+
         // Determine which template to use based on cargo type
-        $template = $batch->cargo_type === 'sea' 
-            ? 'batches.packing-list-sea' 
+        $template = $batch->cargo_type === 'sea'
+            ? 'batches.packing-list-sea'
             : 'batches.packing-list-air';
-        
+
         // Calculate totals
         $totalWeight = $batch->shipments->sum('weight');
         $totalPackages = $batch->shipments->sum('num_packages');
         $totalCBM = $batch->cargo_type === 'sea' ? $batch->shipments->sum('cbm') : 0;
-        
+
         $pdf = \PDF::loadView($template, compact('batch', 'totalWeight', 'totalPackages', 'totalCBM'));
-        
+
         $filename = 'Packing-List-' . $batch->batch_number . '.pdf';
-        
+
         return $pdf->download($filename);
     }
 }
-
-

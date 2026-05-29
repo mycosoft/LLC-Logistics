@@ -205,6 +205,53 @@ function getShipmentTemplate(index) {
                 </div>
                 ` : ''}
 
+                <!-- Sender & Receiver -->
+                <h6 class="text-primary mt-3"><i class="fas fa-users"></i> Sender & Receiver</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header py-2">
+                                <h3 class="card-title">Sender Information</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label><strong>Sender Name</strong></label>
+                                    <input type="text" name="shipments[${index}][sender_name]" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Sender Phone</strong></label>
+                                    <input type="tel" name="shipments[${index}][sender_phone]" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Sender Address</strong></label>
+                                    <textarea name="shipments[${index}][sender_address]" rows="3" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header py-2">
+                                <h3 class="card-title">Receiver Information</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label><strong>Receiver Name</strong></label>
+                                    <input type="text" name="shipments[${index}][receiver_name]" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Receiver Phone</strong></label>
+                                    <input type="tel" name="shipments[${index}][receiver_phone]" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <label><strong>Receiver Address</strong></label>
+                                    <textarea name="shipments[${index}][receiver_address]" rows="3" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Collapsible Additional Details -->
                 <div class="mt-2">
                     <button type="button" class="btn btn-sm btn-outline-secondary" data-toggle="collapse" data-target="#details-${index}">
@@ -543,7 +590,7 @@ document.addEventListener('DOMContentLoaded', function() {
 @stop
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
         <b>Support Call</b> 0750501151

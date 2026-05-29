@@ -7,15 +7,14 @@ use Illuminate\Database\Seeder;
 
 class SettingSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $defaultSettings = [
-            ['key' => 'site_email', 'value' => 'info@bryanzlogistics.com', 'type' => 'email'],
-            ['key' => 'site_phone', 'value' => '+1234567890', 'type' => 'text'],
-            ['key' => 'site_address', 'value' => '123 Main Street, City, Country', 'type' => 'text'],
+            ['key' => 'site_name', 'value' => 'LLC Express Logistics', 'type' => 'text'],
+            ['key' => 'site_email', 'value' => 'info@llclogistics.com', 'type' => 'email'],
+            ['key' => 'site_phone', 'value' => '+256 703 948463', 'type' => 'text'],
+            ['key' => 'site_address', 'value' => 'Kawempe - Tula', 'type' => 'text'],
+            ['key' => 'system_currency', 'value' => 'USD', 'type' => 'text'],
             ['key' => 'smtp_host', 'value' => 'smtp.gmail.com', 'type' => 'text'],
             ['key' => 'smtp_port', 'value' => '587', 'type' => 'text'],
             ['key' => 'smtp_username', 'value' => '', 'type' => 'text'],

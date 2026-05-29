@@ -63,6 +63,20 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="system_currency">Default Currency</label>
+                    <select class="form-control @error('system_currency') is-invalid @enderror" 
+                            id="system_currency" name="system_currency">
+                        <option value="USD" {{ ($settings['system_currency'] ?? 'USD') == 'USD' ? 'selected' : '' }}>$ USD (US Dollar)</option>
+                        <option value="UGX" {{ ($settings['system_currency'] ?? '') == 'UGX' ? 'selected' : '' }}>UGX (Ugandan Shilling)</option>
+                        <option value="EUR" {{ ($settings['system_currency'] ?? '') == 'EUR' ? 'selected' : '' }}>€ EUR (Euro)</option>
+                        <option value="GBP" {{ ($settings['system_currency'] ?? '') == 'GBP' ? 'selected' : '' }}>£ GBP (British Pound)</option>
+                    </select>
+                    @error('system_currency')
+                        <span class="invalid-feedback">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div class="form-group">
                     <label for="site_logo">Company Logo</label>
                     @if(isset($settings['site_logo']))
                         <div class="mb-2">
@@ -192,9 +206,9 @@
 @stop
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-        <b>Support Call</b> 0750501151
+        <b>Support Call</b> +256 703 948463
     </div>
 @stop

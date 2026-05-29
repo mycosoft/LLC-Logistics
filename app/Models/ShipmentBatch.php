@@ -99,6 +99,40 @@ class ShipmentBatch extends Model
     }
 
     /**
+     * Get the total revenue for this batch (sum of all payments from invoices)
+     */
+    public function getRevenueAttribute()
+    {
+        return Payment::query()
+            ->whereHas('invoice', function ($query) {
+                $query->whereHas('shipment', function ($shipmentQuery) {
+                    $shipmentQuery->where('batch_id', $this->id);
+                });
+            })
+            ->sum('amount');
+    }
+
+    /**
+     * Get the total invoiced amount for this batch (sum of all invoice totals)
+     */
+    public function getInvoicedAmountAttribute()
+    {
+        return Invoice::query()
+            ->whereHas('shipment', function ($query) {
+                $query->where('batch_id', $this->id);
+            })
+            ->sum('total');
+    }
+
+    /**
+     * Get the outstanding balance for this batch
+     */
+    public function getOutstandingAmountAttribute()
+    {
+        return $this->invoiced_amount - $this->revenue;
+    }
+
+    /**
      * Update batch status and cascade to all shipments
      * WITH RATE LIMITING to prevent WhatsApp bans
      */

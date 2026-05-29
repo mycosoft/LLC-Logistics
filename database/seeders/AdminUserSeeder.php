@@ -16,7 +16,7 @@ class AdminUserSeeder extends Seeder
         // Create default admin user
         $admin = User::create([
             'name' => 'Admin User',
-            'email' => 'admin@bryanzlogistics.com',
+            'email' => 'admin@llclogistics.com',
             'password' => Hash::make('password'),
         ]);
         $admin->assignRole('admin');
@@ -24,13 +24,13 @@ class AdminUserSeeder extends Seeder
         // Create default staff user
         $staff = User::create([
             'name' => 'Staff User',
-            'email' => 'staff@bryanzlogistics.com',
+            'email' => 'staff@llclogistics.com',
             'password' => Hash::make('password'),
         ]);
         $staff->assignRole('staff');
 
         $this->command->info('Admin and Staff users created successfully!');
-        $this->command->info('Admin: admin@bryanzlogistics.com / password');
-        $this->command->info('Staff: staff@bryanzlogistics.com / password');
+        $this->command->info('Admin: admin@llclogistics.com / password');
+        $this->command->info('Staff: staff@llclogistics.com / password');
     }
 }

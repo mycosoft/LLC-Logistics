@@ -40,8 +40,8 @@
                             <p>Your CSV file must have the following columns in this exact order:</p>
                             <ol class="mb-0">
                                 <li><strong>name</strong> - Client's full name (required)</li>
-                                <li><strong>email</strong> - Client's email address (required, must be unique)</li>
-                                <li><strong>phone</strong> - Client's phone number (required)</li>
+                                <li><strong>email</strong> - Client's email address (optional)</li>
+                                <li><strong>phone</strong> - Client's phone number (required, auto-formats to 256)</li>
                                 <li><strong>company</strong> - Company name (optional)</li>
                                 <li><strong>address</strong> - Full address (optional)</li>
                             </ol>
@@ -79,7 +79,7 @@
                 </div>
                 <div class="card-body">
                     <ul class="mb-0">
-                        <li>Duplicate email addresses will be skipped</li>
+                        <li>Phone numbers are auto-formatted to 256 international format</li>
                         <li>Invalid data will be reported after import</li>
                         <li>Successfully imported clients will be added to the database</li>
                         <li>The import process may take a moment for large files</li>
@@ -102,7 +102,7 @@
 @stop
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
         <b>Support Call</b> 0750501151

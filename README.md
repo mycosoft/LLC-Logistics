@@ -1,4 +1,4 @@
-# Bryanz Logistics Management System
+# LLC Express Logistics Management System
 
 A comprehensive Laravel-based logistics management system for tracking shipments, managing clients, handling invoices and payments, and communicating with customers via WhatsApp.
 
@@ -66,7 +66,7 @@ A comprehensive Laravel-based logistics management system for tracking shipments
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/mycosoft/Bryan-Logistics.git
+git clone https://github.com/mycosoft/LLC-Logistics.git
 ```
 
 2. Install dependencies:
@@ -109,7 +109,7 @@ After seeding, you can login with:
 ## 📁 Project Structure
 
 ```
-Bryanz Logistics/
+LLC Express Logistics/
 ├── app/
 │   ├── Console/Commands/     # Custom artisan commands
 │   ├── Http/Controllers/     # Application controllers

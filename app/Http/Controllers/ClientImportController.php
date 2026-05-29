@@ -10,6 +10,23 @@ use Illuminate\Support\Facades\Validator;
 class ClientImportController extends Controller
 {
     /**
+     * Format phone number to 256 international format for CSV import.
+     */
+    private static function formatPhoneForImport($value): string
+    {
+        if (!empty($value)) {
+            $value = preg_replace('/[^0-9+]/', '', $value);
+            $value = ltrim($value, '+');
+            if (str_starts_with($value, '0')) {
+                $value = '256' . substr($value, 1);
+            } elseif (!str_starts_with($value, '256')) {
+                $value = '256' . $value;
+            }
+        }
+        return $value ?: '';
+    }
+
+    /**
      * Show the import form
      */
     public function showImportForm()
@@ -87,10 +104,13 @@ class ClientImportController extends Controller
                     'address' => $data[4] ?? null,
                 ];
 
+                // Format phone number to 256 format
+                $clientData['phone'] = self::formatPhoneForImport($clientData['phone']);
+
                 // Validate row data
                 $validator = Validator::make($clientData, [
                     'name' => 'required|string|max:255',
-                    'email' => 'required|email|unique:clients,email',
+                    'email' => 'nullable|email|unique:clients,email',
                     'phone' => 'required|string|max:255',
                     'company' => 'nullable|string|max:255',
                     'address' => 'nullable|string',

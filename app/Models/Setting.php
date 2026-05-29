@@ -27,4 +27,22 @@ class Setting extends Model
             ['value' => $value, 'type' => $type]
         );
     }
+
+    /**
+     * Get the currency symbol for the current system currency
+     */
+    public static function getCurrencySymbol($code = null)
+    {
+        $code = $code ?: self::get('system_currency', 'USD');
+        return match($code) {
+            'USD' => '$',
+            'EUR' => '€',
+            'GBP' => '£',
+            'UGX' => 'UGX',
+            'KES' => 'KSh',
+            'TZS' => 'TSh',
+            'RWF' => 'FRw',
+            default => $code,
+        };
+    }
 }

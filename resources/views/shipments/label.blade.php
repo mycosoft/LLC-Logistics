@@ -82,7 +82,7 @@
         </div>
         
         <div class="footer">
-            Thank you for choosing Bryanz Logistics
+            Thank you for choosing LLC Express Logistics
         </div>
     </div>
 </body>

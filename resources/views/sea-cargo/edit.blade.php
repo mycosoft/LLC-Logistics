@@ -93,6 +93,18 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
+                            <label for="charge_type">Charge Type</label>
+                            <select name="charge_type" id="charge_type" class="form-control">
+                                <option value="">Select Charge Type</option>
+                                <option value="per_kg" {{ old('charge_type', $shipment->charge_type) == 'per_kg' ? 'selected' : '' }}>Per Kg</option>
+                                <option value="per_package" {{ old('charge_type', $shipment->charge_type) == 'per_package' ? 'selected' : '' }}>Per Package</option>
+                                <option value="per_cbm" {{ old('charge_type', $shipment->charge_type) == 'per_cbm' ? 'selected' : '' }}>Per CBM</option>
+                                <option value="flat_rate" {{ old('charge_type', $shipment->charge_type) == 'flat_rate' ? 'selected' : '' }}>Flat Rate</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
                             <label for="weight">Weight (kg)</label>
                             <input type="number" step="0.01" name="weight" id="weight" class="form-control" value="{{ old('weight', $shipment->weight) }}">
                         </div>
@@ -182,9 +194,9 @@
 @stop
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-        <b>Support Call</b> 0750501151
+        <b>Support Call</b> +256 703 948463
     </div>
 @stop

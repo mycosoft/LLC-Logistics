@@ -25,7 +25,7 @@ class StoreBatchRequest extends FormRequest
             'name' => 'nullable|string|max:255', // Changed to nullable - will auto-generate if empty
             'description' => 'nullable|string',
             'cargo_type' => 'required|in:air,sea',
-            'current_status' => 'required|in:Pending,Picked Up,In Transit,Arrived at Facility,Out for Delivery,Delivered,On Hold,Cancelled',
+            'current_status' => 'required|in:Pending,Picked Up,In Transit,Arrived at Facility,Out for Delivery,Delivered,On Hold,Cancelled,Ready for Pickup',
             'shipments' => 'nullable|array',
             'shipments.*.client_id' => 'required|exists:clients,id',
             'shipments.*.shipment_type' => 'required|in:air,sea',
@@ -36,13 +36,21 @@ class StoreBatchRequest extends FormRequest
             'shipments.*.weight' => 'nullable|numeric|min:0',
             'shipments.*.num_packages' => 'nullable|integer|min:1',
             'shipments.*.package_type' => 'nullable|in:box,pallet,envelope,custom',
-            'shipments.*.cbm' => 'nullable|numeric|min:0', // Added CBM validation
+            'shipments.*.length' => 'nullable|numeric|min:0',
+            'shipments.*.width' => 'nullable|numeric|min:0',
+            'shipments.*.height' => 'nullable|numeric|min:0',
+            'shipments.*.cbm' => 'nullable|numeric|min:0',
             'shipments.*.fragile' => 'nullable|boolean',
             'shipments.*.shipping_cost' => 'nullable|numeric|min:0',
             'shipments.*.tax' => 'nullable|numeric|min:0',
-            'shipments.*.discount' => 'nullable|numeric|min:0',
             'shipments.*.payment_status' => 'nullable|in:pending,paid,refunded',
             'shipments.*.description' => 'nullable|string',
+            'shipments.*.sender_name' => 'nullable|string|max:255',
+            'shipments.*.sender_phone' => 'nullable|string|max:255',
+            'shipments.*.sender_address' => 'nullable|string',
+            'shipments.*.receiver_name' => 'nullable|string|max:255',
+            'shipments.*.receiver_phone' => 'nullable|string|max:255',
+            'shipments.*.receiver_address' => 'nullable|string',
         ];
     }
 }

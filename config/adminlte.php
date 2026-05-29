@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'Bryan Logistics',
+    'title' => 'LLC Express Logistics',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'logo' => '<b>Bryan</b> Logistics',
+    'logo' => '<b>LLC</b> Express Logistics',
     'logo_img' => '',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -306,6 +306,14 @@ return [
             'topnav_right' => false,
         ],
         [
+            'text'         => 'Track Package',
+            'url'          => 'track',
+            'icon'         => 'fas fa-map-marker-alt',
+            'topnav_right' => true,
+            'classes'      => 'btn btn-sm btn-warning font-weight-bold ml-2 text-dark',
+            'target'       => '_blank',
+        ],
+        [
             'type' => 'fullscreen-widget',
             'topnav_right' => true,
         ],
@@ -382,6 +390,34 @@ return [
             'url'  => 'admin/invoices',
             'icon' => 'fas fa-fw fa-file-invoice-dollar',
             'can'  => 'manage shipments',
+        ],
+        [
+            'text' => 'Transactions',
+            'url'  => 'admin/transactions',
+            'icon' => 'fas fa-fw fa-exchange-alt',
+            'can'  => 'manage shipments',
+        ],
+        [
+            'text' => 'Expenses',
+            'icon' => 'fas fa-fw fa-money-bill-wave',
+            'can'  => 'manage shipments',
+            'submenu' => [
+                [
+                    'text' => 'All Expenses',
+                    'url'  => 'admin/expenses',
+                    'icon' => 'fas fa-fw fa-list',
+                ],
+                [
+                    'text' => 'Create Expense',
+                    'url'  => 'admin/expenses/create',
+                    'icon' => 'fas fa-fw fa-plus',
+                ],
+                [
+                    'text' => 'Categories',
+                    'url'  => 'admin/expense-categories',
+                    'icon' => 'fas fa-fw fa-tags',
+                ],
+            ],
         ],
         ['header' => 'SYSTEM MANAGEMENT'],
         [

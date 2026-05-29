@@ -37,12 +37,12 @@ class PaymentController extends Controller
     public function show(Payment $payment)
     {
         $payment->load(['invoice.shipment.client', 'recorder']);
-        
+
         $companySettings = [
-            'name' => 'Bryanz Logistics',
-            'address' => 'Ttowa Mall building, Room C102, Opposite CPS Kampala',
-            'phone' => '0755 729 943 / 0743 507 702',
-            'email' => 'bryanlogistics256@gmail.com',
+            'name' => 'LLC Express Logistics',
+            'address' => 'Kawempe - Tula',
+            'phone' => '+256 703 948463',
+            'email' => 'info@llclogistics.com',
             'logo' => 'images/logo.png',
         ];
 
@@ -55,12 +55,12 @@ class PaymentController extends Controller
     public function generateReceipt(Payment $payment)
     {
         $payment->load(['invoice.shipment.client', 'recorder']);
-        
+
         $companySettings = [
-            'name' => 'Bryanz Logistics',
-            'address' => 'Ttowa Mall building, Room C102, Opposite CPS Kampala',
-            'phone' => '0755 729 943 / 0743 507 702',
-            'email' => 'bryanlogistics256@gmail.com',
+            'name' => 'LLC Express Logistics',
+            'address' => 'Kawempe - Tula',
+            'phone' => '+256 703 948463',
+            'email' => 'info@llclogistics.com',
             'logo' => 'images/logo.png',
         ];
 
@@ -80,9 +80,9 @@ class PaymentController extends Controller
     public function sendReceipt(Request $request, Payment $payment)
     {
         $payment->load(['invoice.shipment.client']);
-        
+
         $client = $payment->invoice->shipment->client;
-        
+
         if (!$client) {
             return redirect()->back()->with('error', 'Client not found for this payment.');
         }
@@ -98,7 +98,8 @@ class PaymentController extends Controller
             try {
                 $client->notify(new \App\Notifications\ReceiptSent($payment));
                 $sentVia[] = 'email';
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 \Log::error('Failed to send receipt email: ' . $e->getMessage());
             }
         }
@@ -108,7 +109,8 @@ class PaymentController extends Controller
             try {
                 $client->notify(new \App\Notifications\ReceiptSent($payment));
                 $sentVia[] = 'whatsapp';
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 \Log::error('Failed to send receipt WhatsApp: ' . $e->getMessage());
             }
         }

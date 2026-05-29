@@ -56,8 +56,24 @@ class ClientController extends Controller
      */
     public function show(Client $client)
     {
-        $client->load('shipments');
-        return view('clients.show', compact('client'));
+        $client->load([
+            'shipments.invoices.payments',
+            'shipments.invoices.items',
+        ]);
+
+        // Build financial summary
+        $totalInvoiced   = 0;
+        $totalPaid       = 0;
+        $totalOutstanding = 0;
+        foreach ($client->shipments as $shipment) {
+            if ($shipment->invoice) {
+                $totalInvoiced   += $shipment->invoice->total;
+                $totalPaid       += $shipment->invoice->amount_paid;
+                $totalOutstanding += $shipment->invoice->balance;
+            }
+        }
+
+        return view('clients.show', compact('client', 'totalInvoiced', 'totalPaid', 'totalOutstanding'));
     }
 
     /**
@@ -88,5 +104,48 @@ class ClientController extends Controller
 
         return redirect()->route('clients.index')
             ->with('success', 'Client deleted successfully.');
+    }
+
+    /**
+     * Quick store a client via AJAX for modals on cargo create pages.
+     */
+    public function quickStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|unique:clients,email',
+            'company' => 'nullable|string|max:255',
+            'address' => 'nullable|string',
+        ]);
+
+        $client = Client::create($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Client "' . $client->name . '" added successfully.',
+            'client' => [
+                'id' => $client->id,
+                'name' => $client->name,
+                'phone' => $client->phone,
+                'company' => $client->company,
+            ]
+        ]);
+    }
+
+    /**
+     * Search clients for autocomplete
+     */
+    public function search(Request $request)
+    {
+        $search = $request->get('q', '');
+        
+        $clients = Client::where('name', 'like', "%{$search}%")
+            ->orWhere('phone', 'like', "%{$search}%")
+            ->orWhere('company', 'like', "%{$search}%")
+            ->limit(20)
+            ->get(['id', 'name', 'phone', 'company', 'email']);
+        
+        return response()->json($clients);
     }
 }

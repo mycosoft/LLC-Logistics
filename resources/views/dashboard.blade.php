@@ -78,7 +78,7 @@
                         @php
                             $totalRevenue = \App\Models\Payment::sum('amount');
                         @endphp
-                        <span class="info-box-number">UGX {{ number_format($totalRevenue, 0) }}</span>
+                        <span class="info-box-number">{{ \App\Models\Setting::getCurrencySymbol(null) }} {{ number_format($totalRevenue, 0) }}</span>
                     </div>
                 </div>
             </a>
@@ -94,7 +94,7 @@
                                 ->whereMonth('payment_date', now()->month)
                                 ->sum('amount');
                         @endphp
-                        <span class="info-box-number">UGX {{ number_format($monthlyRevenue, 0) }}</span>
+                        <span class="info-box-number">{{ \App\Models\Setting::getCurrencySymbol(null) }} {{ number_format($monthlyRevenue, 0) }}</span>
                     </div>
                 </div>
             </a>
@@ -110,7 +110,7 @@
                                 ->where('status', '!=', 'cancelled')
                                 ->sum(\DB::raw('total - (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE payments.invoice_id = invoices.id)'));
                         @endphp
-                        <span class="info-box-number">UGX {{ number_format($outstanding, 0) }}</span>
+                        <span class="info-box-number">{{ \App\Models\Setting::getCurrencySymbol(null) }} {{ number_format($outstanding, 0) }}</span>
                     </div>
                 </div>
             </a>
@@ -187,10 +187,12 @@
                                                 'Picked Up' => 'info',
                                                 'In Transit' => 'primary',
                                                 'Arrived at Facility' => 'secondary',
+                                                'Ready for Pickup' => 'success',
                                                 'Out for Delivery' => 'info',
                                                 'Delivered' => 'success',
                                                 'On Hold' => 'dark',
-                                                'Cancelled' => 'danger'
+                                                'Cancelled' => 'danger',
+                                                'Auction Warning' => 'danger'
                                             ];
                                             $badgeClass = $statusColors[$shipment->current_status] ?? 'secondary';
                                         @endphp
@@ -204,7 +206,6 @@
                 </div>
             </div>
         </div>
-
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
@@ -262,17 +263,16 @@
             </div>
         </div>
     </div>
+
 @stop
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-        <b>Support Call</b> 0750501151
+        <b>Support Call</b> +256 703 948463
     </div>
 @stop
-
-
 
 @section('js')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -330,6 +330,7 @@ for (let i = 5; i >= 0; i--) {
 // Get shipment counts from PHP
 @php
     $monthlyCounts = [];
+
     for ($i = 5; $i >= 0; $i--) {
         $date = now()->subMonths($i);
         $count = \App\Models\Shipment::whereYear('created_at', $date->year)
@@ -376,13 +377,3 @@ new Chart(monthlyCtx, {
 });
 </script>
 @stop
-
-
-@section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
-    All rights reserved.
-    <div class="float-right d-none d-sm-inline-block">
-        <b>Support Call</b> 0750501151
-    </div>
-@stop
-

@@ -104,10 +104,10 @@
 <body>
     <!-- Professional Header -->
     <div class="header">
-        <img src="{{ public_path('images/logo.png') }}" alt="Bryanz Logistics" class="logo">
+        <img src="{{ public_path('images/logo.png') }}" alt="LLC Express Logistics" class="logo">
         <div class="company-details">
             Ttowa Mall Building, Room C102, Opposite CPS Kampala<br>
-            Tel: 0755 729 943 / 0743 507 702 | Email: bryanlogistics256@gmail.com
+            Tel: 0755 729 943 / 0743 507 702 | Email: llclogistics256@gmail.com
         </div>
         <div class="document-title">Packing List - Air Cargo</div>
     </div>
@@ -181,7 +181,7 @@
     </div>
 
     <div class="footer">
-        <p>© {{ date('Y') }} Bryanz Logistics. All rights reserved.</p>
+        <p>© {{ date('Y') }} LLC Express Logistics. All rights reserved.</p>
         <p>This is a computer-generated document. No signature is required.</p>
     </div>
 </body>

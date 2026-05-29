@@ -65,7 +65,7 @@ class TestWhatsAppProviders extends Command
             $this->info("📱 Sending test message to: {$phone}");
             $this->newLine();
 
-            $message = "🧪 Test message from Bryanz Logistics\n\n";
+            $message = "🧪 Test message from LLC Express Logistics\n\n";
             $message .= "Provider: " . $whatsappService->getProviderName() . "\n";
             $message .= "Time: " . now()->format('Y-m-d H:i:s') . "\n";
             $message .= "\nThis is a test message to verify WhatsApp integration.";

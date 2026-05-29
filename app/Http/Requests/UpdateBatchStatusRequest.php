@@ -22,7 +22,7 @@ class UpdateBatchStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'current_status' => 'required|in:Pending,Picked Up,In Transit,Arrived at Facility,Out for Delivery,Delivered,On Hold,Cancelled',
+            'current_status' => 'required|in:Pending,Picked Up,In Transit,Arrived at Facility,Out for Delivery,Delivered,On Hold,Cancelled,Ready for Pickup',
             'location' => 'required|string|max:255',
             'notes' => 'nullable|string',
         ];

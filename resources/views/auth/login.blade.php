@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Bryan Logistics</title>
+    <title>Login - LLC Express Logistics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -31,7 +31,7 @@
         <div class="text-center">
             <div class="flex justify-center mb-6">
                 <!-- Assuming logo is in public/images/logo.png -->
-                <img src="{{ asset('images/logo.png') }}" alt="Bryanz Logistics Logo" class="h-40 w-auto object-contain">
+                <img src="{{ asset('images/logo.png') }}" alt="LLC Express Logistics Logo" class="h-40 w-auto object-contain">
             </div>
             <h2 class="text-3xl font-bold text-gray-900">
                 Welcome Back
@@ -131,9 +131,9 @@
         </form>
 
         <!-- Footer -->
-        <div class="mt-6 text-center">
+            <div class="mt-6 text-center">
             <p class="text-xs text-gray-500">
-                &copy; {{ date('Y') }} Bryanz Logistics. All rights reserved.
+                &copy; {{ date('Y') }} LLC Express Logistics. All rights reserved.
             </p>
         </div>
     </div>

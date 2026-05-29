@@ -92,10 +92,12 @@
                                             'Picked Up' => 'info',
                                             'In Transit' => 'primary',
                                             'Arrived at Facility' => 'secondary',
+                                            'Ready for Pickup' => 'success',
                                             'Out for Delivery' => 'info',
                                             'Delivered' => 'success',
                                             'On Hold' => 'dark',
-                                            'Cancelled' => 'danger'
+                                            'Cancelled' => 'danger',
+                                            'Auction Warning' => 'danger'
                                         ];
                                         $badgeClass = $statusColors[$shipment->current_status] ?? 'secondary';
                                     @endphp
@@ -136,10 +138,10 @@
 
 
 @section('footer')
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">Bryanz Logistics</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">LLC Express Logistics</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
-        <b>Support Call</b> 0750501151
+        <b>Support Call</b> +256 703 948463
     </div>
 @stop
 

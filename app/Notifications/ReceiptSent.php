@@ -39,11 +39,11 @@ class ReceiptSent extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $companySettings = [
-            'name' => 'Bryanz Logistics',
-            'address' => 'Ttowa Mall building, Room C102, Opposite CPS Kampala',
-            'phone' => '0755 729 943 / 0743 507 702',
-            'email' => 'bryanlogistics256@gmail.com',
-            'logo' => 'images/logo.png',
+            'name' => 'LLC Express Logistics',
+            'address' => 'Kawempe - Tula',
+            'phone' => '+256 703 948463',
+            'email' => 'info@llclogistics.com',
+            'logo' => 'images/logo.jpeg',
         ];
 
         // Generate PDF
@@ -84,12 +84,14 @@ class ReceiptSent extends Notification implements ShouldQueue
             $imagePath = null;
         }
 
+        $currency = $this->payment->invoice->shipment->currency ?? \App\Models\Setting::getCurrencySymbol();
+
         $mail = (new MailMessage)
             ->subject('Payment Receipt - ' . $this->payment->receipt_number)
             ->greeting('Dear ' . $notifiable->name . ',')
             ->line('Thank you for your payment.')
             ->line('Receipt Number: ' . $this->payment->receipt_number)
-            ->line('Amount Paid: UGX ' . number_format($this->payment->amount, 2))
+            ->line('Amount Paid: ' . $currency . ' ' . number_format($this->payment->amount, 2))
             ->line('Payment Date: ' . $this->payment->payment_date->format('F d, Y'))
             ->line('Payment Method: ' . ucwords(str_replace('_', ' ', $this->payment->payment_method)))
             ->attachData($pdf->output(), 'receipt-' . $this->payment->receipt_number . '.pdf', [
@@ -111,18 +113,20 @@ class ReceiptSent extends Notification implements ShouldQueue
 
     public function toWhatsApp($notifiable)
     {
+        $currency = $this->payment->invoice->shipment->currency ?? \App\Models\Setting::getCurrencySymbol();
+
         $message = "🧾 *Payment Receipt*\n\n";
         $message .= "Dear {$notifiable->name},\n\n";
         $message .= "Thank you for your payment.\n\n";
         $message .= "📋 *Receipt Details:*\n";
         $message .= "Receipt No: {$this->payment->receipt_number}\n";
-        $message .= "Amount: UGX " . number_format($this->payment->amount, 2) . "\n";
+        $message .= "Amount: {$currency} " . number_format($this->payment->amount, 2) . "\n";
         $message .= "Date: " . $this->payment->payment_date->format('F d, Y') . "\n";
         $message .= "Method: " . ucwords(str_replace('_', ' ', $this->payment->payment_method)) . "\n\n";
         $message .= "Invoice: {$this->payment->invoice->invoice_number}\n";
-        $message .= "Balance: UGX " . number_format($this->payment->invoice->balance, 2) . "\n\n";
+        $message .= "Balance: {$currency} " . number_format($this->payment->invoice->balance, 2) . "\n\n";
         $message .= "Thank you for your business!\n";
-        $message .= "📞 Support: 0755 729 943";
+        $message .= "📞 Support: +256 703 948463";
 
         return $message;
     }

@@ -9,6 +9,9 @@ Route::redirect('/', '/login');
 Route::get('/track', [App\Http\Controllers\TrackingController::class, 'index'])->name('tracking.index');
 Route::get('/track/result', [App\Http\Controllers\TrackingController::class, 'track'])->name('tracking.result');
 
+// Public Client Search for autocomplete
+Route::get('/clients/search', [App\Http\Controllers\ClientController::class, 'search'])->name('clients.search');
+
 // Dashboard - accessible by both admin and staff
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -28,21 +31,22 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // User & Role Management (Admin only)
     Route::resource('users', App\Http\Controllers\UserController::class);
     Route::resource('roles', App\Http\Controllers\RoleController::class);
-    
+
     // Client Import (must be before clients resource route)
     Route::get('clients/import', [App\Http\Controllers\ClientImportController::class, 'showImportForm'])->name('clients.import');
     Route::post('clients/import', [App\Http\Controllers\ClientImportController::class, 'import'])->name('clients.import.process');
     Route::get('clients/import/template', [App\Http\Controllers\ClientImportController::class, 'downloadTemplate'])->name('clients.import.template');
-    
+    Route::post('clients/quick-store', [App\Http\Controllers\ClientController::class, 'quickStore'])->name('clients.quick-store');
+
     // Client Management (Admin only)
     Route::resource('clients', App\Http\Controllers\ClientController::class);
-    
+
     // Air Cargo Management
     Route::resource('air-cargo', App\Http\Controllers\AirCargoController::class);
-    
+
     // Sea Cargo Management
     Route::resource('sea-cargo', App\Http\Controllers\SeaCargoController::class);
-    
+
     // Shipment Management (Admin only)
     Route::get('shipments/{shipment}/label', [App\Http\Controllers\ShipmentController::class, 'label'])->name('shipments.label');
     Route::get('shipments/{shipment}/invoice', [App\Http\Controllers\ShipmentController::class, 'invoice'])->name('shipments.invoice');
@@ -52,20 +56,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('invoices', App\Http\Controllers\InvoiceController::class);
     Route::get('invoices/{invoice}/pdf', [App\Http\Controllers\InvoiceController::class, 'generatePDF'])->name('invoices.pdf');
     Route::post('invoices/{invoice}/send', [App\Http\Controllers\InvoiceController::class, 'sendInvoice'])->name('invoices.send');
-    
+
     // Payment Management
     Route::post('invoices/{invoice}/payments', [App\Http\Controllers\PaymentController::class, 'store'])->name('payments.store');
     Route::get('payments/{payment}/receipt', [App\Http\Controllers\PaymentController::class, 'generateReceipt'])->name('payments.receipt');
     Route::post('payments/{payment}/send', [App\Http\Controllers\PaymentController::class, 'sendReceipt'])->name('payments.send');
     Route::resource('payments', App\Http\Controllers\PaymentController::class)->except(['create', 'edit', 'update']);
-    
+
+    // Transactions Module (Standalone payment management)
+    Route::resource('transactions', App\Http\Controllers\TransactionController::class)->only(['index', 'create', 'store', 'show']);
+
     // Shipment Status Updates (Admin only)
     Route::post('shipment-status-updates', [App\Http\Controllers\ShipmentStatusUpdateController::class, 'store'])->name('shipment-status-updates.store');
-    
+
     // Bulk Broadcast
     Route::get('broadcast', [App\Http\Controllers\BroadcastController::class, 'index']);
     Route::post('broadcast/send', [App\Http\Controllers\BroadcastController::class, 'send']);
-    
+
     // Reports
     Route::get('reports', [App\Http\Controllers\ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/revenue', [App\Http\Controllers\ReportController::class, 'revenue'])->name('reports.revenue');
@@ -74,26 +81,40 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('reports/shipments', [App\Http\Controllers\ReportController::class, 'shipments'])->name('reports.shipments');
     Route::get('reports/clients', [App\Http\Controllers\ReportController::class, 'clients'])->name('reports.clients');
     Route::get('reports/analytics', [App\Http\Controllers\ReportController::class, 'analytics'])->name('reports.analytics');
+    Route::get('reports/batch-revenue', [App\Http\Controllers\ReportController::class, 'batchRevenue'])->name('reports.batch-revenue');
+    Route::get('reports/expenses', [App\Http\Controllers\ReportController::class, 'expenses'])->name('reports.expenses');
     Route::get('reports/shipments/pdf', [App\Http\Controllers\ReportController::class, 'exportShipmentsPdf'])->name('reports.shipments.pdf');
     Route::get('reports/clients/pdf', [App\Http\Controllers\ReportController::class, 'exportClientsPdf'])->name('reports.clients.pdf');
-    
+
     // Settings
     Route::get('settings', [App\Http\Controllers\SettingController::class, 'index']);
     Route::put('settings', [App\Http\Controllers\SettingController::class, 'update']);
-    
+
     // Batch Management
     Route::resource('batches', App\Http\Controllers\ShipmentBatchController::class);
     Route::post('batches/{batch}/update-status', [App\Http\Controllers\ShipmentBatchController::class, 'updateStatus'])->name('batches.update-status');
     Route::post('batches/{batch}/add-shipment', [App\Http\Controllers\ShipmentBatchController::class, 'addShipment'])->name('batches.add-shipment');
     Route::delete('batches/{batch}/shipments/{shipment}', [App\Http\Controllers\ShipmentBatchController::class, 'removeShipment'])->name('batches.remove-shipment');
     Route::get('batches/{batch}/packing-list', [App\Http\Controllers\ShipmentBatchController::class, 'generatePackingList'])->name('batches.packing-list');
+
+    // Expense Categories Management
+    Route::resource('expense-categories', App\Http\Controllers\ExpenseCategoryController::class);
+
+    // Expenses Management
+    Route::resource('expenses', App\Http\Controllers\ExpenseController::class);
+    Route::get('expenses/{expense}/receipt', [App\Http\Controllers\ExpenseController::class, 'generateReceipt'])->name('expenses.receipt');
+    Route::post('expenses/{expense}/approve', [App\Http\Controllers\ExpenseController::class, 'approve'])->name('expenses.approve');
+    Route::post('expenses/{expense}/reject', [App\Http\Controllers\ExpenseController::class, 'reject'])->name('expenses.reject');
+    Route::post('expenses/{expense}/mark-paid', [App\Http\Controllers\ExpenseController::class, 'markAsPaid'])->name('expenses.mark-paid');
 });
 
 // Staff and Admin routes
 Route::middleware(['auth', 'role:admin,staff'])->group(function () {
     // Shared routes for both admin and staff will be added here
+
     // Client Management
     Route::resource('clients', App\Http\Controllers\ClientController::class);
+
     // Shipment Management
     Route::resource('shipments', App\Http\Controllers\ShipmentController::class);
     Route::post('shipments/{shipment}/updates', [App\Http\Controllers\ShipmentStatusUpdateController::class, 'store'])->name('shipments.updates.store');

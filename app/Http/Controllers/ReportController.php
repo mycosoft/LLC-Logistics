@@ -4,17 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    protected function getCurrency()
+    {
+        return Setting::get('system_currency', 'UGX');
+    }
+
     /**
      * Reports dashboard
      */
     public function index()
     {
-        return view('reports.index');
+        $currency = $this->getCurrency();
+        $totalRevenue = Payment::sum('amount');
+        $monthlyRevenue = Payment::whereYear('payment_date', now()->year)
+            ->whereMonth('payment_date', now()->month)
+            ->sum('amount');
+        $outstanding = Invoice::where('status', '!=', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->leftJoin('payments', 'payments.invoice_id', '=', 'invoices.id')
+            ->selectRaw('SUM(invoices.total) - COALESCE(SUM(payments.amount), 0) as balance')
+            ->value('balance');
+        $totalExpenses = \App\Models\Expense::where('status', '!=', 'rejected')->sum('amount');
+
+        return view('reports.index', compact('currency', 'totalRevenue', 'monthlyRevenue', 'outstanding', 'totalExpenses'));
     }
 
     /**
@@ -39,8 +58,9 @@ class ReportController extends Controller
 
         $payments = $query->latest('payment_date')->paginate(50);
         $totalRevenue = $query->sum('amount');
+        $currency = $this->getCurrency();
 
-        return view('reports.revenue', compact('payments', 'totalRevenue'));
+        return view('reports.revenue', compact('payments', 'totalRevenue', 'currency'));
     }
 
     /**
@@ -65,10 +85,16 @@ class ReportController extends Controller
             $query->where('status', $request->status);
         }
 
-        $invoices = $query->latest('issue_date')->paginate(50);
-        $totalOutstanding = $invoices->sum('balance');
+        // Get total before pagination
+        $totalOutstanding = (clone $query)
+            ->leftJoin('payments', 'payments.invoice_id', '=', 'invoices.id')
+            ->selectRaw('SUM(invoices.total) - COALESCE(SUM(payments.amount), 0) as balance')
+            ->value('balance');
 
-        return view('reports.outstanding', compact('invoices', 'totalOutstanding'));
+        $invoices = $query->latest('issue_date')->paginate(50);
+        $currency = $this->getCurrency();
+
+        return view('reports.outstanding', compact('invoices', 'totalOutstanding', 'currency'));
     }
 
     /**
@@ -144,6 +170,92 @@ class ReportController extends Controller
         $clients = $query->latest()->paginate(50);
 
         return view('reports.clients', compact('clients'));
+    }
+
+    /**
+     * Batch revenue report
+     */
+    public function batchRevenue(Request $request)
+    {
+        $query = \App\Models\ShipmentBatch::with(['creator', 'shipments.client']);
+
+        // Date filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Cargo type filter
+        if ($request->filled('cargo_type')) {
+            $query->where('cargo_type', $request->cargo_type);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('current_status', $request->status);
+        }
+
+        $batches = $query->latest()->paginate(50);
+
+        // Calculate total revenue across all filtered batches
+        $totalRevenue = 0;
+        $totalInvoiced = 0;
+        $totalOutstanding = 0;
+
+        foreach ($batches->items() as $batch) {
+            $totalRevenue += $batch->revenue;
+            $totalInvoiced += $batch->invoiced_amount;
+            $totalOutstanding += $batch->outstanding_amount;
+        }
+        $currency = $this->getCurrency();
+
+        return view('reports.batch-revenue', compact('batches', 'totalRevenue', 'totalInvoiced', 'totalOutstanding', 'currency'));
+    }
+
+    /**
+     * Expenses report
+     */
+    public function expenses(Request $request)
+    {
+        $query = \App\Models\Expense::with(['category', 'recorder']);
+
+        // Date filters
+        if ($request->filled('date_from')) {
+            $query->whereDate('expense_date', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('expense_date', '<=', $request->date_to);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Category filter
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        $expenses = $query->latest('expense_date')->paginate(50);
+
+        // Calculate totals by category
+        $categoryTotals = \App\Models\Expense::query()
+            ->when($request->filled('date_from'), fn($q) => $q->whereDate('expense_date', '>=', $request->date_from))
+            ->when($request->filled('date_to'), fn($q) => $q->whereDate('expense_date', '<=', $request->date_to))
+            ->where('status', '!=', 'rejected')
+            ->selectRaw('category_id, SUM(amount) as total')
+            ->groupBy('category_id')
+            ->with('category')
+            ->get()
+            ->pluck('total', 'category.name');
+
+        $totalExpenses = $categoryTotals->sum();
+        $currency = $this->getCurrency();
+
+        return view('reports.expenses', compact('expenses', 'categoryTotals', 'totalExpenses', 'currency'));
     }
 
     /**
