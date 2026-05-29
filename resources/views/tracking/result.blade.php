@@ -6,6 +6,7 @@
     <title>Tracking Result - {{ $shipment->tracking_number }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Outfit', sans-serif; }
     </style>
@@ -14,18 +15,28 @@
     <!-- Navbar -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
+            <div class="flex justify-between h-20 items-center">
                 <div class="flex items-center">
-                    <div class="flex-shrink-0 flex items-center gap-3">
-                        <a href="{{ route('tracking.index') }}" class="flex items-center gap-3">
-                            <img class="h-10 w-auto object-contain" src="{{ asset('images/logo.png') }}" alt="LLC Express Logistics">
-                            <span class="text-2xl font-bold text-gray-900 tracking-tight">LLC Express Logistics</span>
-                        </a>
+                    <a href="{{ route('tracking.index') }}" class="flex items-center gap-3">
+                        <img class="h-10 w-auto object-contain" src="{{ asset('images/logo.png') }}" alt="LLC Express Logistics">
+                        <span class="text-2xl font-bold text-gray-900 tracking-tight">LLC Express Logistics</span>
+                    </a>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('tracking.index') }}" class="flex items-center gap-2 text-gray-700 hover:text-blue-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 hover:bg-blue-50">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>New Search</span>
+                    </a>
+                </div>
             </div>
         </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-10 space-y-6">
 
         @if(strtolower($shipment->current_status) === 'ready for pickup')
-        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-lg shadow-sm">
+        <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg shadow-sm">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
@@ -43,7 +54,7 @@
         @endif
 
         @if(strtolower($shipment->current_status) === 'auction warning')
-        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-8 rounded-lg shadow-sm">
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
             <div class="flex">
                 <div class="flex-shrink-0">
                     <svg class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
@@ -60,10 +71,62 @@
         </div>
         @endif
 
+        <!-- Shipment Info Card -->
+        <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100">
+            <div class="px-6 py-6 sm:px-8 border-b border-gray-100">
+                <h3 class="text-lg leading-6 font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-box text-blue-600"></i> Shipment Details
+                </h3>
+            </div>
+            <div class="px-6 py-6 sm:px-8">
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Tracking Number</dt>
+                        <dd class="mt-1 text-lg font-bold text-gray-900">{{ $shipment->tracking_number }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Current Status</dt>
+                        <dd class="mt-1">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold
+                                @if(strtolower($shipment->current_status) === 'delivered') bg-green-100 text-green-800
+                                @elseif(strtolower($shipment->current_status) === 'ready for pickup') bg-teal-100 text-teal-800
+                                @elseif(str_contains(strtolower($shipment->current_status), 'auction')) bg-red-100 text-red-800
+                                @elseif(str_contains(strtolower($shipment->current_status), 'transit') || str_contains(strtolower($shipment->current_status), 'shipped')) bg-blue-100 text-blue-800
+                                @elseif(str_contains(strtolower($shipment->current_status), 'pending') || str_contains(strtolower($shipment->current_status), 'created')) bg-gray-100 text-gray-800
+                                @elseif(str_contains(strtolower($shipment->current_status), 'hold') || str_contains(strtolower($shipment->current_status), 'delayed')) bg-yellow-100 text-yellow-800
+                                @elseif(str_contains(strtolower($shipment->current_status), 'cancelled') || str_contains(strtolower($shipment->current_status), 'failed')) bg-red-100 text-red-800
+                                @else bg-gray-100 text-gray-700
+                                @endif">
+                                {{ $shipment->current_status }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Route</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $shipment->origin }} → {{ $shipment->destination }}</dd>
+                    </div>
+                    @if($shipment->expected_delivery_date)
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Expected Delivery</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ \Carbon\Carbon::parse($shipment->expected_delivery_date)->format('M d, Y') }}</dd>
+                    </div>
+                    @endif
+                    @if($shipment->client)
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Client</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ $shipment->client->name }}</dd>
+                    </div>
+                    @endif
+                </dl>
+            </div>
+        </div>
+
         <!-- Timeline -->
         <div class="bg-white shadow-lg rounded-2xl overflow-hidden border border-gray-100">
             <div class="px-6 py-6 sm:px-8 border-b border-gray-100">
-                <h3 class="text-lg leading-6 font-bold text-gray-900">Tracking History</h3>
+                <h3 class="text-lg leading-6 font-bold text-gray-900 flex items-center gap-2">
+                    <i class="fas fa-history text-blue-600"></i> Tracking History
+                </h3>
             </div>
             <div class="px-6 py-8 sm:px-8">
                 <div class="flow-root">
@@ -80,7 +143,7 @@
                                                 $status = strtolower($update->status);
                                                 $iconColor = 'bg-blue-600';
                                                 $icon = '';
-                                                
+
                                                 if (str_contains($status, 'delivered')) {
                                                     $iconColor = 'bg-green-500';
                                                     $icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />';
@@ -103,11 +166,10 @@
                                                     $iconColor = 'bg-red-500';
                                                     $icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
                                                 } else {
-                                                    // Default
                                                     $icon = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />';
                                                 }
                                             @endphp
-                                            
+
                                             <span class="h-10 w-10 rounded-full {{ $iconColor }} flex items-center justify-center ring-4 ring-white shadow-md">
                                                 <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     {!! $icon !!}
